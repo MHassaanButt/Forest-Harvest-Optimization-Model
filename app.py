@@ -97,27 +97,27 @@ if uploaded_file is not None:
             df = pd.read_csv(uploaded_file, sep="\t" if "tsv" in uploaded_file.name else ",")
         else:
             df = pd.read_excel(uploaded_file)
-        
+
         # Validation
         if 'agb_ton_ha' not in df.columns:
             st.error("Error: Data must contain column 'agb_ton_ha'")
         else:
             st.success(f"Loaded {len(df)} grid cells!")
-            
+
             # --- "RUN" BUTTON ---
             if st.button("🚀 Run Optimization"):
-                
+
                 # 1. State Grouping (Efficiency)
                 df['biomass_group'] = df['agb_ton_ha'].round(1)
                 unique_states = df['biomass_group'].unique()
                 unique_states.sort()
-                
+
                 st.info(f"Optimizing {len(unique_states)} unique biomass states...")
-                
+
                 # 2. Run Optimization (Progress Bar)
                 progress_bar = st.progress(0)
                 results_map = {}
-                
+
                 params = {
                     'fuel_price': fuelwood_price,
                     'carbon_price': carbon_price,
@@ -126,26 +126,26 @@ if uploaded_file is not None:
                     'generations': generations,
                     'mutation': mutation_rate
                 }
-                
+
                 start_time = time.time()
                 for i, biomass_val in enumerate(unique_states):
                     best_schedule = run_optimization(biomass_val, params)
                     results_map[biomass_val] = best_schedule
                     progress_bar.progress((i + 1) / len(unique_states))
-                
+
                 end_time = time.time()
                 st.success(f"Optimization finished in {end_time - start_time:.2f} seconds!")
-                
+
                 # 3. Map Results Back
                 df['Optimal_Schedule'] = df['biomass_group'].map(lambda x: results_map[x])
-                
+
                 # 4. Visualization
                 st.subheader("📊 Optimization Results")
-                
+
                 # Calculate average harvest dynamic
                 all_schedules = np.array(list(results_map.values()))
                 mean_harvest = all_schedules.mean(axis=0)
-                
+
                 fig, ax = plt.subplots(figsize=(10, 5))
                 ax.plot(range(1, 31), mean_harvest, marker='o', color='forestgreen', label='Avg Harvest')
                 ax.set_title(f"Optimal Harvest Dynamics (Carbon Price: ${carbon_price})")
@@ -153,7 +153,7 @@ if uploaded_file is not None:
                 ax.set_ylabel("Harvest (Mg/ha)")
                 ax.grid(True, alpha=0.3)
                 st.pyplot(fig)
-                
+
                 # 5. Download Button
                 # Convert DF to CSV string
                 csv = df.to_csv(index=False).encode('utf-8')
@@ -168,11 +168,27 @@ if uploaded_file is not None:
 
 else:
     st.info("👋 Please upload a CSV or Excel file to begin.")
-    
+
     # Show example data format
     st.markdown("### Example Data Format")
-    example_df = pd.DataFrame({
-        'grid_id': [1, 2, 3],
-        'agb_ton_ha': [15.4, 12.2, 18.5]
-    })
+    example_df = pd.DataFrame(
+        {
+            "grid_id": [1, 2, 3, 4, 5],
+            "x": [
+                579359.479599999,
+                578134.674499999,
+                579057.6088,
+                576665.669299999,
+                580039.510699999,
+            ],
+            "y": [
+                1554129.62199999,
+                1554115.803,
+                1554435.80499999,
+                1554417.86599999,
+                1555677.81099999,
+            ],
+            "agb_ton_ha": [32.7199999999999, 18.64, 7.43, 12.25, 45.12],
+        }
+    )
     st.table(example_df)
