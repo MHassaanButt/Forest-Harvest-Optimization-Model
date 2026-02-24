@@ -103,8 +103,9 @@ The model reveals a distinct trade-off sensitivity to carbon pricing:
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+<!-- 
 ## 📚 References
 
 If you use this code or data, please cite the original manuscript:
 > Kassun, B.W., Meressa, A.M., Rannestad, M.M. (2025). *Optimal harvest levels and trade-off dynamics between fuelwood provision and carbon sequestration in a dry Afromontane Forest*. Norwegian University of Life Sciences.
+-->
